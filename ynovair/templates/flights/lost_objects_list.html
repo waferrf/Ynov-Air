@@ -1,0 +1,164 @@
+{% extends 'flights/base.html' %}
+
+{% block title %}Objets perdus - Ynov Air{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="display-4 mb-3">
+                <i class="fas fa-box-open text-warning"></i> Objets perdus
+            </h1>
+            <p class="lead text-muted">
+                Consultez la liste des objets trouvés et réclamez le vôtre
+            </p>
+        </div>
+        <div class="col-md-4 text-end">
+            {% if user.is_authenticated and user.is_superuser %}
+                <a href="{% url 'lost_object_report' %}" class="btn btn-success btn-lg">
+                    <i class="fas fa-plus-circle"></i> Signaler un objet trouvé
+                </a>
+                <a href="{% url 'my_lost_objects' %}" class="btn btn-outline-success mt-2">
+                    <i class="fas fa-list"></i> Mes signalements
+                </a>
+            {% elif user.is_authenticated %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    Seuls les administrateurs peuvent signaler des objets
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <a href="{% url 'login' %}">Connectez-vous</a> pour voir plus de détails
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="search" class="form-label">
+                        <i class="fas fa-search"></i> Recherche
+                    </label>
+                    <input type="text" class="form-control" id="search" name="search" 
+                           placeholder="Nom, référence, description..." value="{{ request.GET.search }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="category" class="form-label">
+                        <i class="fas fa-tag"></i> Catégorie
+                    </label>
+                    <select class="form-select" id="category" name="category">
+                        <option value="">Toutes les catégories</option>
+                        {% for value, label in categories %}
+                            <option value="{{ value }}" {% if request.GET.category == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="status" class="form-label">
+                        <i class="fas fa-flag"></i> Statut
+                    </label>
+                    <select class="form-select" id="status" name="status">
+                        <option value="">Tous les statuts</option>
+                        {% for value, label in statuses %}
+                            <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="fas fa-filter"></i> Filtrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lost Objects List -->
+    {% if lost_objects %}
+        <div class="row">
+            {% for obj in lost_objects %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm hover-shadow">
+                        <div class="card-header bg-light">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-secondary">{{ obj.get_category_display }}</span>
+                                <span class="badge 
+                                    {% if obj.status == 'FOUND' %}bg-success
+                                    {% elif obj.status == 'CLAIMED' %}bg-warning
+                                    {% elif obj.status == 'RETURNED' %}bg-info
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ obj.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="fas fa-box text-warning"></i> {{ obj.item_name }}
+                            </h5>
+                            <p class="card-text text-muted small">
+                                {{ obj.description|truncatewords:20 }}
+                            </p>
+                            <ul class="list-unstyled small mb-3">
+                                {% if obj.color %}
+                                    <li><i class="fas fa-palette text-primary"></i> Couleur: {{ obj.color }}</li>
+                                {% endif %}
+                                {% if obj.brand %}
+                                    <li><i class="fas fa-copyright text-primary"></i> Marque: {{ obj.brand }}</li>
+                                {% endif %}
+                                <li>
+                                    <i class="fas fa-map-marker-alt text-danger"></i> 
+                                    {{ obj.location_found }}
+                                </li>
+                                <li>
+                                    <i class="fas fa-calendar text-info"></i> 
+                                    {{ obj.date_found|date:"d/m/Y à H:i" }}
+                                </li>
+                                {% if obj.flight %}
+                                    <li>
+                                        <i class="fas fa-plane text-success"></i> 
+                                        Vol {{ obj.flight.flight_number }}
+                                    </li>
+                                {% endif %}
+                            </ul>
+                            <div class="text-muted small mb-2">
+                                <i class="fas fa-hashtag"></i> Réf: {{ obj.reference_number }}
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white">
+                            <a href="{% url 'lost_object_detail' obj.id %}" class="btn btn-outline-success btn-sm w-100">
+                                <i class="fas fa-eye"></i> Voir les détails
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center py-5">
+            <i class="fas fa-inbox fa-3x mb-3"></i>
+            <h4>Aucun objet trouvé</h4>
+            <p class="mb-0">Aucun objet ne correspond à vos critères de recherche.</p>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .hover-shadow {
+        transition: all 0.3s ease;
+    }
+    
+    .hover-shadow:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15) !important;
+    }
+</style>
+{% endblock %}

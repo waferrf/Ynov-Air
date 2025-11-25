@@ -1,0 +1,128 @@
+{% extends 'flights/base.html' %}
+
+{% block title %}Réclamer un objet - Ynov Air{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning">
+                    <h2 class="mb-0">
+                        <i class="fas fa-hand-paper"></i> Réclamer cet objet
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <!-- Object Summary -->
+                    <div class="alert alert-light border mb-4">
+                        <h4 class="mb-3">
+                            <i class="fas fa-box-open text-success"></i> {{ lost_object.item_name }}
+                        </h4>
+                        <div class="row small">
+                            <div class="col-md-6">
+                                <p class="mb-1">
+                                    <strong>Référence:</strong> <code>{{ lost_object.reference_number }}</code>
+                                </p>
+                                <p class="mb-1">
+                                    <strong>Catégorie:</strong> {{ lost_object.get_category_display }}
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1">
+                                    <strong>Lieu:</strong> {{ lost_object.location_found }}
+                                </p>
+                                <p class="mb-1">
+                                    <strong>Date:</strong> {{ lost_object.date_found|date:"d/m/Y" }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        <strong>Important:</strong> Assurez-vous que cet objet vous appartient vraiment. 
+                        Fournissez des preuves et des détails précis pour faciliter la vérification.
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <h4 class="mb-3">
+                            <i class="fas fa-user text-primary"></i> Vos informations
+                        </h4>
+
+                        <div class="mb-3">
+                            <label for="claimer_name" class="form-label">
+                                Votre nom complet <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="claimer_name" 
+                                   name="claimer_name" required
+                                   placeholder="Prénom et nom">
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="claimer_email" class="form-label">
+                                    Votre email <span class="text-danger">*</span>
+                                </label>
+                                <input type="email" class="form-control" id="claimer_email" 
+                                       name="claimer_email" required
+                                       placeholder="exemple@email.com">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="claimer_phone" class="form-label">
+                                    Votre téléphone <span class="text-danger">*</span>
+                                </label>
+                                <input type="tel" class="form-control" id="claimer_phone" 
+                                       name="claimer_phone" required
+                                       placeholder="06 12 34 56 78">
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <h4 class="mb-3">
+                            <i class="fas fa-clipboard-check text-success"></i> Preuve de propriété
+                        </h4>
+
+                        <div class="mb-3">
+                            <label for="claim_details" class="form-label">
+                                Pourquoi cet objet vous appartient-il ? <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" id="claim_details" name="claim_details" 
+                                      rows="6" required
+                                      placeholder="Décrivez en détail pourquoi cet objet vous appartient. Incluez des détails que seul le propriétaire pourrait connaître (numéro de série, contenu spécifique, marques particulières, circonstances de perte, etc.)"></textarea>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle"></i> 
+                                Plus vous fournirez de détails précis, plus vite votre réclamation sera traitée.
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <h5><i class="fas fa-clock"></i> Que se passe-t-il ensuite ?</h5>
+                            <ol class="mb-0 small">
+                                <li>Votre réclamation est enregistrée et examinée par notre équipe</li>
+                                <li>Nous vérifions les informations et les preuves fournies</li>
+                                <li>Si votre réclamation est validée, nous vous contactons pour organiser la restitution</li>
+                                <li>Vous devrez présenter une pièce d'identité lors de la récupération</li>
+                            </ol>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Submit Buttons -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'lost_object_detail' lost_object.id %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Retour
+                            </a>
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                <i class="fas fa-paper-plane"></i> Envoyer la réclamation
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

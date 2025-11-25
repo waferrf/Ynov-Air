@@ -1,0 +1,173 @@
+{% extends 'flights/base.html' %}
+
+{% block title %}{{ lost_object.item_name }} - Objet perdu{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h2 class="mb-0">
+                        <i class="fas fa-box-open"></i> {{ lost_object.item_name }}
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <!-- Status Badge -->
+                    <div class="mb-3">
+                        <span class="badge 
+                            {% if lost_object.status == 'FOUND' %}bg-success
+                            {% elif lost_object.status == 'CLAIMED' %}bg-warning
+                            {% elif lost_object.status == 'RETURNED' %}bg-info
+                            {% else %}bg-secondary{% endif %} fs-6">
+                            <i class="fas fa-flag"></i> {{ lost_object.get_status_display }}
+                        </span>
+                        <span class="badge bg-secondary fs-6 ms-2">
+                            <i class="fas fa-tag"></i> {{ lost_object.get_category_display }}
+                        </span>
+                    </div>
+
+                    <!-- Reference Number -->
+                    <div class="alert alert-light border">
+                        <strong><i class="fas fa-hashtag"></i> Référence:</strong> 
+                        <code class="fs-5">{{ lost_object.reference_number }}</code>
+                    </div>
+
+                    <!-- Description -->
+                    <h4 class="mt-4 mb-3">
+                        <i class="fas fa-align-left text-primary"></i> Description
+                    </h4>
+                    <p class="lead">{{ lost_object.description }}</p>
+
+                    <!-- Details -->
+                    <h4 class="mt-4 mb-3">
+                        <i class="fas fa-info-circle text-primary"></i> Détails
+                    </h4>
+                    <div class="row">
+                        {% if lost_object.color %}
+                            <div class="col-md-6 mb-3">
+                                <strong><i class="fas fa-palette text-warning"></i> Couleur:</strong>
+                                <span>{{ lost_object.color }}</span>
+                            </div>
+                        {% endif %}
+                        {% if lost_object.brand %}
+                            <div class="col-md-6 mb-3">
+                                <strong><i class="fas fa-copyright text-info"></i> Marque:</strong>
+                                <span>{{ lost_object.brand }}</span>
+                            </div>
+                        {% endif %}
+                        <div class="col-md-6 mb-3">
+                            <strong><i class="fas fa-map-marker-alt text-danger"></i> Lieu de découverte:</strong>
+                            <span>{{ lost_object.location_found }}</span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong><i class="fas fa-calendar text-success"></i> Date de découverte:</strong>
+                            <span>{{ lost_object.date_found|date:"d/m/Y à H:i" }}</span>
+                        </div>
+                        {% if lost_object.flight %}
+                            <div class="col-md-12 mb-3">
+                                <strong><i class="fas fa-plane text-primary"></i> Vol associé:</strong>
+                                <a href="{% url 'flight_detail' lost_object.flight.id %}">
+                                    {{ lost_object.flight.flight_number }} - 
+                                    {{ lost_object.flight.origin.code }} → {{ lost_object.flight.destination.code }}
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Claim Information -->
+                    {% if lost_object.status == 'CLAIMED' or lost_object.status == 'RETURNED' %}
+                        <div class="alert alert-warning mt-4">
+                            <h5><i class="fas fa-exclamation-triangle"></i> Réclamation en cours</h5>
+                            <p class="mb-0">
+                                Cet objet a été réclamé le {{ lost_object.claim_date|date:"d/m/Y à H:i" }}.
+                                {% if lost_object.status == 'RETURNED' %}
+                                    Il a été restitué le {{ lost_object.returned_date|date:"d/m/Y à H:i" }}.
+                                {% else %}
+                                    Il est en cours de traitement.
+                                {% endif %}
+                            </p>
+                        </div>
+                    {% endif %}
+
+                    <!-- Action Buttons -->
+                    <div class="mt-4">
+                        {% if user.is_authenticated and lost_object.status == 'FOUND' %}
+                            <a href="{% url 'lost_object_claim' lost_object.id %}" 
+                               class="btn btn-success btn-lg">
+                                <i class="fas fa-hand-paper"></i> Réclamer cet objet
+                            </a>
+                        {% elif lost_object.status == 'CLAIMED' %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-clock"></i>
+                                Cet objet a déjà été réclamé et est en cours de vérification.
+                            </div>
+                        {% elif lost_object.status == 'RETURNED' %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-check-circle"></i>
+                                Cet objet a déjà été restitué à son propriétaire.
+                            </div>
+                        {% elif not user.is_authenticated %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle"></i>
+                                <a href="{% url 'login' %}">Connectez-vous</a> pour réclamer cet objet
+                            </div>
+                        {% endif %}
+                        <a href="{% url 'lost_objects_list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour à la liste
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Contact Info -->
+            {% if lost_object.finder_name or lost_object.finder_email or lost_object.finder_phone %}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user"></i> Informations du découvreur
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if lost_object.finder_name %}
+                            <p class="mb-2">
+                                <strong><i class="fas fa-user-circle"></i> Nom:</strong><br>
+                                {{ lost_object.finder_name }}
+                            </p>
+                        {% endif %}
+                        {% if lost_object.finder_email %}
+                            <p class="mb-2">
+                                <strong><i class="fas fa-envelope"></i> Email:</strong><br>
+                                <a href="mailto:{{ lost_object.finder_email }}">{{ lost_object.finder_email }}</a>
+                            </p>
+                        {% endif %}
+                        {% if lost_object.finder_phone %}
+                            <p class="mb-0">
+                                <strong><i class="fas fa-phone"></i> Téléphone:</strong><br>
+                                <a href="tel:{{ lost_object.finder_phone }}">{{ lost_object.finder_phone }}</a>
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Help Card -->
+            <div class="card shadow-sm bg-light">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-question-circle text-info"></i> Besoin d'aide ?
+                    </h5>
+                    <p class="small mb-0">
+                        Si vous pensez que cet objet vous appartient, cliquez sur "Réclamer cet objet" 
+                        et fournissez des informations détaillées pour prouver qu'il vous appartient.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

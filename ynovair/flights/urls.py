@@ -23,4 +23,11 @@ urlpatterns = [
     path('logout/', logout_view, name='logout'),
     path('profile/', profile_view, name='profile'),
     path('profile/update/', profile_update_view, name='profile_update'),
+    
+    # Lost Objects
+    path('lost-objects/', views.lost_objects_list, name='lost_objects_list'),
+    path('lost-objects/<int:object_id>/', views.lost_object_detail, name='lost_object_detail'),
+    path('lost-objects/report/', views.lost_object_report, name='lost_object_report'),
+    path('lost-objects/<int:object_id>/claim/', views.lost_object_claim, name='lost_object_claim'),
+    path('my-lost-objects/', views.my_lost_objects, name='my_lost_objects'),
 ]

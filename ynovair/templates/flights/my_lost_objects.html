@@ -1,0 +1,158 @@
+{% extends 'flights/base.html' %}
+
+{% block title %}Mes signalements - Objets perdus{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="display-4 mb-4">
+                <i class="fas fa-list text-success"></i> Mes signalements d'objets trouvés
+            </h1>
+            
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <p class="lead text-muted mb-0">
+                    Objets que vous avez signalés comme trouvés
+                </p>
+                <a href="{% url 'lost_object_report' %}" class="btn btn-success">
+                    <i class="fas fa-plus-circle"></i> Nouveau signalement
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% if lost_objects %}
+        <div class="row">
+            {% for obj in lost_objects %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-light">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-secondary">{{ obj.get_category_display }}</span>
+                                <span class="badge 
+                                    {% if obj.status == 'FOUND' %}bg-success
+                                    {% elif obj.status == 'CLAIMED' %}bg-warning
+                                    {% elif obj.status == 'RETURNED' %}bg-info
+                                    {% else %}bg-secondary{% endif %}">
+                                    {{ obj.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="fas fa-box text-warning"></i> {{ obj.item_name }}
+                            </h5>
+                            <p class="card-text text-muted small">
+                                {{ obj.description|truncatewords:15 }}
+                            </p>
+                            
+                            <ul class="list-unstyled small">
+                                <li class="mb-1">
+                                    <i class="fas fa-hashtag text-primary"></i> 
+                                    <strong>Réf:</strong> {{ obj.reference_number }}
+                                </li>
+                                <li class="mb-1">
+                                    <i class="fas fa-map-marker-alt text-danger"></i> 
+                                    {{ obj.location_found }}
+                                </li>
+                                <li class="mb-1">
+                                    <i class="fas fa-calendar text-info"></i> 
+                                    {{ obj.date_found|date:"d/m/Y" }}
+                                </li>
+                                {% if obj.flight %}
+                                    <li class="mb-1">
+                                        <i class="fas fa-plane text-success"></i> 
+                                        Vol {{ obj.flight.flight_number }}
+                                    </li>
+                                {% endif %}
+                            </ul>
+
+                            <!-- Claim Status -->
+                            {% if obj.status == 'CLAIMED' %}
+                                <div class="alert alert-warning alert-sm small mb-2">
+                                    <i class="fas fa-hand-paper"></i> 
+                                    Réclamé par <strong>{{ obj.claimer_name }}</strong>
+                                    <br>
+                                    <small>le {{ obj.claim_date|date:"d/m/Y" }}</small>
+                                </div>
+                            {% elif obj.status == 'RETURNED' %}
+                                <div class="alert alert-info alert-sm small mb-2">
+                                    <i class="fas fa-check-circle"></i> 
+                                    Restitué le {{ obj.returned_date|date:"d/m/Y" }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="card-footer bg-white">
+                            <a href="{% url 'lost_object_detail' obj.id %}" 
+                               class="btn btn-outline-success btn-sm w-100">
+                                <i class="fas fa-eye"></i> Voir les détails
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="col-12">
+            <div class="alert alert-info text-center py-5">
+                <i class="fas fa-inbox fa-3x mb-3"></i>
+                <h4>Aucun signalement</h4>
+                <p class="mb-3">Vous n'avez pas encore signalé d'objets trouvés.</p>
+                <a href="{% url 'lost_object_report' %}" class="btn btn-success">
+                    <i class="fas fa-plus-circle"></i> Signaler un objet trouvé
+                </a>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Statistics -->
+    {% if lost_objects %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-chart-bar"></i> Statistiques
+                        </h5>
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <div class="stat-box">
+                                    <h3 class="text-success">{{ lost_objects|length }}</h3>
+                                    <p class="text-muted small mb-0">Total signalé</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-box">
+                                    <h3 class="text-warning">
+                                        {{ lost_objects|selectattr:"status=CLAIMED"|list|length }}
+                                    </h3>
+                                    <p class="text-muted small mb-0">Réclamé</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-box">
+                                    <h3 class="text-info">
+                                        {{ lost_objects|selectattr:"status=RETURNED"|list|length }}
+                                    </h3>
+                                    <p class="text-muted small mb-0">Restitué</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .stat-box {
+        padding: 1rem;
+    }
+    
+    .alert-sm {
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}

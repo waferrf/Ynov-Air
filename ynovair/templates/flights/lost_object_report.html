@@ -1,0 +1,174 @@
+{% extends 'flights/base.html' %}
+
+{% block title %}Signaler un objet trouvé - Ynov Air{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h2 class="mb-0">
+                        <i class="fas fa-plus-circle"></i> Signaler un objet trouvé
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <p class="lead text-muted mb-4">
+                        Vous avez trouvé un objet ? Aidez son propriétaire à le retrouver en le signalant ici.
+                    </p>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Item Information -->
+                        <h4 class="mb-3">
+                            <i class="fas fa-box text-primary"></i> Informations sur l'objet
+                        </h4>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <label for="item_name" class="form-label">
+                                    Nom de l'objet <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="item_name" 
+                                       name="item_name" required
+                                       placeholder="Ex: Téléphone portable, Sac à dos, etc.">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="category" class="form-label">
+                                    Catégorie <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="category" name="category" required>
+                                    <option value="">Choisir...</option>
+                                    {% for value, label in categories %}
+                                        <option value="{{ value }}">{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">
+                                Description détaillée <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" id="description" name="description" 
+                                      rows="4" required
+                                      placeholder="Décrivez l'objet en détail (taille, état, caractéristiques particulières...)"></textarea>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="color" class="form-label">Couleur</label>
+                                <input type="text" class="form-control" id="color" 
+                                       name="color" placeholder="Ex: Noir, Rouge, Bleu...">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="brand" class="form-label">Marque</label>
+                                <input type="text" class="form-control" id="brand" 
+                                       name="brand" placeholder="Ex: Apple, Samsung, Nike...">
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Location Information -->
+                        <h4 class="mb-3">
+                            <i class="fas fa-map-marker-alt text-danger"></i> Localisation
+                        </h4>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="location_found" class="form-label">
+                                    Lieu de découverte <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="location_found" 
+                                       name="location_found" required
+                                       placeholder="Ex: Terminal 2, Porte 15, Salle d'attente...">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="flight" class="form-label">
+                                    Vol associé (optionnel)
+                                </label>
+                                <select class="form-select" id="flight" name="flight">
+                                    <option value="">Aucun vol spécifique</option>
+                                    {% for flight in flights %}
+                                        <option value="{{ flight.id }}">
+                                            {{ flight.flight_number }} - 
+                                            {{ flight.origin.code }} → {{ flight.destination.code }}
+                                            ({{ flight.departure_time|date:"d/m/Y H:i" }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Finder Contact Information -->
+                        <h4 class="mb-3">
+                            <i class="fas fa-user text-info"></i> Vos coordonnées
+                        </h4>
+                        <p class="text-muted small mb-3">
+                            Ces informations permettront au propriétaire de vous contacter si nécessaire.
+                        </p>
+
+                        <div class="mb-3">
+                            <label for="finder_name" class="form-label">
+                                Votre nom <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="finder_name" 
+                                   name="finder_name" required
+                                   placeholder="Prénom et nom">
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="finder_email" class="form-label">
+                                    Votre email <span class="text-danger">*</span>
+                                </label>
+                                <input type="email" class="form-control" id="finder_email" 
+                                       name="finder_email" required
+                                       placeholder="exemple@email.com">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="finder_phone" class="form-label">
+                                    Votre téléphone <span class="text-danger">*</span>
+                                </label>
+                                <input type="tel" class="form-control" id="finder_phone" 
+                                       name="finder_phone" required
+                                       placeholder="06 12 34 56 78">
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Submit Buttons -->
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'lost_objects_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Annuler
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-paper-plane"></i> Signaler l'objet
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Info Card -->
+            <div class="card bg-light mt-4">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-info-circle text-info"></i> Information importante
+                    </h5>
+                    <p class="small mb-0">
+                        En signalant un objet trouvé, vous aidez une personne à retrouver ses biens. 
+                        Nous vous remercions pour votre honnêteté et votre civisme. 
+                        Les informations fournies seront traitées de manière confidentielle.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

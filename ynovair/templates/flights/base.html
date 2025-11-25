@@ -79,6 +79,11 @@
                             <i class="fas fa-search"></i> Rechercher
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'lost_objects_list' %}">
+                            <i class="fas fa-box-open"></i> Objets perdus
+                        </a>
+                    </li>
                     
                     {% if user.is_authenticated %}
                         <li class="nav-item">
